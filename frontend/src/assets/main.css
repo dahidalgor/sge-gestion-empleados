@@ -1,0 +1,83 @@
+:root {
+  --bg: #f4f6fa;
+  --panel: #ffffff;
+  --texto: #1d2433;
+  --texto-suave: #5d6880;
+  --borde: #e2e6ef;
+  --primario: #1f6feb;
+  --primario-hover: #1858c4;
+  --primario-suave: #e8f0fe;
+  --lateral: #14213d;
+  --lateral-texto: #c9d3e8;
+  --exito: #1a7f4e;
+  --exito-suave: #e3f5ec;
+  --peligro: #c8312f;
+  --peligro-suave: #fdecec;
+  --aviso: #a86200;
+  --aviso-suave: #fff3df;
+  --info: #5a4bd1;
+  --info-suave: #eeebff;
+  --gris-suave: #eef0f4;
+  --radio: 10px;
+  --sombra: 0 1px 3px rgba(20, 33, 61, 0.08), 0 4px 16px rgba(20, 33, 61, 0.05);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--texto);
+  background: var(--bg);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); font-size: 14px; line-height: 1.45; }
+h1, h2, h3 { margin: 0; line-height: 1.2; }
+h1 { font-size: 22px; }
+h2 { font-size: 17px; }
+a { color: var(--primario); }
+
+/* ---------- Botones ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: 1px solid transparent; border-radius: 8px; padding: 8px 14px;
+  font: inherit; font-weight: 600; cursor: pointer; transition: background .15s, border-color .15s;
+  background: var(--gris-suave); color: var(--texto); white-space: nowrap;
+}
+.btn:hover { background: #e2e6ef; }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+.btn-primario { background: var(--primario); color: #fff; }
+.btn-primario:hover { background: var(--primario-hover); }
+.btn-peligro { background: var(--peligro); color: #fff; }
+.btn-peligro:hover { background: #a92826; }
+.btn-borde { background: transparent; border-color: var(--borde); }
+.btn-borde:hover { background: var(--gris-suave); }
+.btn-sm { padding: 5px 10px; font-size: 13px; }
+.btn-icono { padding: 6px 8px; background: transparent; }
+.btn-icono:hover { background: var(--gris-suave); }
+
+/* ---------- Formularios ---------- */
+.campo { display: flex; flex-direction: column; gap: 5px; }
+.campo label { font-size: 13px; font-weight: 600; color: var(--texto-suave); }
+.campo input, .campo select, .control {
+  font: inherit; padding: 9px 11px; border: 1px solid var(--borde); border-radius: 8px;
+  background: #fff; color: var(--texto); width: 100%;
+}
+.campo input:focus, .campo select:focus, .control:focus {
+  outline: none; border-color: var(--primario); box-shadow: 0 0 0 3px var(--primario-suave);
+}
+.campo.invalido input, .campo.invalido select { border-color: var(--peligro); }
+.campo .error { color: var(--peligro); font-size: 12px; }
+
+/* ---------- Tarjetas ---------- */
+.tarjeta { background: var(--panel); border: 1px solid var(--borde); border-radius: var(--radio); box-shadow: var(--sombra); }
+
+/* ---------- Etiquetas de estado ---------- */
+.etiqueta { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.etiqueta-Activo { background: var(--exito-suave); color: var(--exito); }
+.etiqueta-Vacaciones { background: var(--info-suave); color: var(--info); }
+.etiqueta-Licencia { background: var(--aviso-suave); color: var(--aviso); }
+.etiqueta-Inactivo { background: var(--gris-suave); color: var(--texto-suave); }
+
+/* ---------- Mensajes ---------- */
+.alerta { padding: 10px 12px; border-radius: 8px; font-size: 13px; }
+.alerta-error { background: var(--peligro-suave); color: var(--peligro); }
+.alerta-info { background: var(--primario-suave); color: #1748a3; }
+
+.texto-suave { color: var(--texto-suave); }
+.mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12.5px; }
