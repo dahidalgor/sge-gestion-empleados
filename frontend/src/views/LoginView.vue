@@ -37,71 +37,46 @@ async function ingresar() {
 
 <template>
   <div class="pantalla">
-    <section class="marca">
-      <div class="logo">SGE</div>
-      <h1>Sistema de Gestión de Empleados</h1>
-      <p>Administración del talento humano con acceso seguro mediante JSON Web Tokens.</p>
-      <ul>
-        <li>Autenticación con JWT firmado (HS256)</li>
-        <li>Rutas protegidas en el frontend y en el API</li>
-        <li>Permisos según el rol incluido en el token</li>
-      </ul>
-    </section>
+    <form class="tarjeta caja" novalidate @submit.prevent="ingresar">
+      <header>
+        <h1>Sistema de Gestión de Empleados</h1>
+        <p class="texto-suave">Inicie sesión para continuar</p>
+      </header>
 
-    <section class="formulario">
-      <form class="tarjeta caja" novalidate @submit.prevent="ingresar">
-        <h2>Iniciar sesión</h2>
-        <p class="texto-suave">Ingrese sus credenciales para continuar</p>
+      <div v-if="errorGeneral" class="alerta alerta-error">{{ errorGeneral }}</div>
 
-        <div v-if="errorGeneral" class="alerta alerta-error">{{ errorGeneral }}</div>
+      <div class="campo" :class="{ invalido: errores.usuario }">
+        <label for="usuario">Usuario</label>
+        <input id="usuario" v-model="form.usuario" autocomplete="username" autofocus />
+        <span v-if="errores.usuario" class="error">{{ errores.usuario }}</span>
+      </div>
 
-        <div class="campo" :class="{ invalido: errores.usuario }">
-          <label for="usuario">Usuario</label>
-          <input id="usuario" v-model="form.usuario" autocomplete="username" autofocus />
-          <span v-if="errores.usuario" class="error">{{ errores.usuario }}</span>
-        </div>
+      <div class="campo" :class="{ invalido: errores.password }">
+        <label for="password">Contraseña</label>
+        <input id="password" v-model="form.password" :type="verPassword ? 'text' : 'password'" autocomplete="current-password" />
+        <span v-if="errores.password" class="error">{{ errores.password }}</span>
+        <label class="mostrar"><input v-model="verPassword" type="checkbox" /> Mostrar contraseña</label>
+      </div>
 
-        <div class="campo" :class="{ invalido: errores.password }">
-          <label for="password">Contraseña</label>
-          <div class="con-boton">
-            <input id="password" v-model="form.password" :type="verPassword ? 'text' : 'password'" autocomplete="current-password" />
-            <button type="button" class="btn btn-icono" @click="verPassword = !verPassword">
-              {{ verPassword ? 'Ocultar' : 'Ver' }}
-            </button>
-          </div>
-          <span v-if="errores.password" class="error">{{ errores.password }}</span>
-        </div>
+      <button class="btn btn-primario" type="submit" :disabled="cargando">
+        {{ cargando ? 'Verificando…' : 'Ingresar' }}
+      </button>
 
-        <button class="btn btn-primario" type="submit" :disabled="cargando">
-          {{ cargando ? 'Verificando…' : 'Ingresar' }}
-        </button>
-
-        <div class="alerta alerta-info demo">
-          <strong>Usuarios de prueba</strong><br />
-          admin / Admin123* (puede crear, editar y eliminar)<br />
-          consulta / Consulta123* (solo lectura)
-        </div>
-      </form>
-    </section>
+      <p class="demo texto-suave">
+        Usuarios de prueba: <span class="mono">admin / Admin123*</span> ·
+        <span class="mono">consulta / Consulta123*</span>
+      </p>
+    </form>
   </div>
 </template>
 
 <style scoped>
-.pantalla { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; }
-.marca { background: linear-gradient(150deg, #14213d 0%, #1f3f7a 100%); color: #e6ecf8; padding: 64px; display: flex; flex-direction: column; justify-content: center; gap: 16px; }
-.marca h1 { font-size: 32px; color: #fff; }
-.marca p { font-size: 16px; max-width: 440px; color: #c9d3e8; margin: 0; }
-.marca ul { padding-left: 18px; color: #c9d3e8; margin: 8px 0 0; display: grid; gap: 6px; }
-.logo { width: 56px; height: 56px; border-radius: 14px; background: #fff; color: var(--lateral); display: grid; place-items: center; font-weight: 800; font-size: 18px; }
-.formulario { display: grid; place-items: center; padding: 32px 16px; }
-.caja { width: 100%; max-width: 380px; padding: 32px; display: flex; flex-direction: column; gap: 16px; }
-.caja p { margin: -10px 0 4px; }
-.con-boton { display: flex; gap: 6px; }
-.demo { line-height: 1.6; }
-@media (max-width: 820px) {
-  .pantalla { grid-template-columns: 1fr; }
-  .marca { padding: 32px 20px; }
-  .marca h1 { font-size: 24px; }
-  .marca ul { display: none; }
-}
+.pantalla { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
+.caja { width: 100%; max-width: 360px; padding: 28px; display: flex; flex-direction: column; gap: 16px; }
+header { border-bottom: 1px solid var(--borde); padding-bottom: 14px; }
+header h1 { font-size: 18px; }
+header p { margin: 4px 0 0; }
+.mostrar { display: flex; align-items: center; gap: 6px; font-weight: 400 !important; color: var(--texto-suave) !important; margin-top: 4px; cursor: pointer; }
+.mostrar input { width: auto !important; margin: 0; }
+.demo { margin: 0; font-size: 12px; border-top: 1px solid var(--borde); padding-top: 12px; }
 </style>
