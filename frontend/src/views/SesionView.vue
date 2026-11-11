@@ -94,14 +94,13 @@ async function verPerfil() {
 <style scoped>
 .vista { display: flex; flex-direction: column; gap: 16px; }
 .vista > div p { margin: 4px 0 0; }
-.bloque { padding: 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.bloque { padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .bloque p { margin: 0; }
-.token { word-break: break-all; background: #0f172a; color: #e2e8f0; padding: 14px; border-radius: 8px; line-height: 1.6; }
-.c1 { color: #f87171; } .c2 { color: #c084fc; } .c3 { color: #38bdf8; }
-b.c1 { color: #dc2626; } b.c2 { color: #9333ea; } b.c3 { color: #0284c7; }
-.punto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
-.c1f { background: #f87171; } .c2f { background: #c084fc; }
-pre { margin: 0; background: var(--gris-suave); padding: 12px; border-radius: 8px; overflow-x: auto; }
+.token { word-break: break-all; background: var(--gris-suave); border: 1px solid var(--borde); padding: 12px; border-radius: var(--radio); line-height: 1.6; }
+.c1 { color: #a82a2a; } .c2 { color: #5b3f8a; } .c3 { color: #1f5f7a; }
+.punto { display: inline-block; width: 8px; height: 8px; margin-right: 8px; }
+.c1f { background: #a82a2a; } .c2f { background: #5b3f8a; }
+pre { margin: 0; background: var(--gris-suave); border: 1px solid var(--borde); padding: 10px; border-radius: var(--radio); overflow-x: auto; }
 .columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .detalle { margin: 0; padding-left: 18px; display: grid; gap: 4px; color: var(--texto-suave); font-size: 13px; }
 .botones { display: flex; gap: 8px; flex-wrap: wrap; }

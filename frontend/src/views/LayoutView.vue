@@ -35,7 +35,7 @@ function salir() {
 <template>
   <div class="app">
     <aside class="lateral" :class="{ abierto: menuAbierto }">
-      <div class="marca"><span class="logo">SGE</span> Gestión de Empleados</div>
+      <div class="marca">SGE<span>Gestión de Empleados</span></div>
       <nav @click="menuAbierto = false">
         <RouterLink :to="{ name: 'panel' }" exact-active-class="activo">Panel</RouterLink>
         <RouterLink :to="{ name: 'empleados' }" active-class="activo">Empleados</RouterLink>
@@ -48,7 +48,7 @@ function salir() {
         <button class="btn btn-icono menu" @click="menuAbierto = !menuAbierto">☰</button>
         <div class="espacio"></div>
         <RouterLink :to="{ name: 'sesion' }" class="token" :class="{ poco: restante < 300 }" title="Tiempo restante del token">
-          Token expira en {{ formatoTiempo(restante) }}
+          Sesión: {{ formatoTiempo(restante) }}
         </RouterLink>
         <div class="usuario">
           <strong>{{ auth.usuario?.nombre }}</strong>
@@ -65,19 +65,20 @@ function salir() {
 
 <style scoped>
 .app { display: grid; grid-template-columns: 230px 1fr; min-height: 100vh; }
-.lateral { background: var(--lateral); color: var(--lateral-texto); padding: 18px 12px; display: flex; flex-direction: column; gap: 22px; }
-.marca { display: flex; align-items: center; gap: 10px; color: #fff; font-weight: 700; padding: 0 6px; }
-.logo { background: #fff; color: var(--lateral); border-radius: 8px; padding: 5px 7px; font-size: 12px; font-weight: 800; }
-nav { display: flex; flex-direction: column; gap: 4px; }
-nav a { color: var(--lateral-texto); text-decoration: none; padding: 9px 12px; border-radius: 8px; font-weight: 500; }
-nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
-nav a.activo { background: var(--primario); color: #fff; }
+.lateral { background: var(--lateral); color: var(--lateral-texto); padding: 18px 0; display: flex; flex-direction: column; gap: 12px; }
+.marca { display: flex; flex-direction: column; color: #fff; font-weight: 600; font-size: 16px; padding: 0 12px 16px; border-bottom: 1px solid #2e3846; }
+.marca span { font-size: 12px; font-weight: 400; color: var(--lateral-texto); }
+nav { display: flex; flex-direction: column; }
+nav a { color: var(--lateral-texto); text-decoration: none; padding: 9px 12px 9px 9px; border-left: 3px solid transparent; }
+nav a:hover { background: #242e3c; color: #fff; }
+nav a.activo { background: #263244; border-left-color: #8fa8c8; color: #fff; }
 .principal { min-width: 0; display: flex; flex-direction: column; }
-.cabecera { display: flex; align-items: center; gap: 14px; padding: 12px 24px; background: var(--panel); border-bottom: 1px solid var(--borde); }
+.cabecera { display: flex; align-items: center; gap: 18px; padding: 10px 24px; background: var(--panel); border-bottom: 1px solid var(--borde); }
 .espacio { flex: 1; }
 .menu { display: none; font-size: 18px; }
-.token { font-size: 12px; font-weight: 600; background: var(--exito-suave); color: var(--exito); padding: 5px 10px; border-radius: 999px; text-decoration: none; font-variant-numeric: tabular-nums; }
-.token.poco { background: var(--aviso-suave); color: var(--aviso); }
+.token { font-size: 12px; color: var(--texto-suave); text-decoration: none; font-variant-numeric: tabular-nums; }
+.token:hover { text-decoration: underline; }
+.token.poco { color: var(--aviso); font-weight: 600; }
 .usuario { display: flex; flex-direction: column; line-height: 1.25; font-size: 13px; text-align: right; }
 .contenido { padding: 24px; min-width: 0; }
 @media (max-width: 860px) {

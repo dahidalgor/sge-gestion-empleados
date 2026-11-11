@@ -104,9 +104,10 @@ const campos = [
 </template>
 
 <style scoped>
-.fondo { position: fixed; inset: 0; background: rgba(20, 33, 61, .45); display: grid; place-items: center; z-index: 60; padding: 16px; }
+.fondo { position: fixed; inset: 0; background: rgba(0, 0, 0, .35); display: grid; place-items: center; z-index: 60; padding: 16px; }
 .modal { width: 100%; max-width: 760px; max-height: calc(100vh - 32px); display: flex; flex-direction: column; }
-header, footer { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; }
+header, footer { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; }
+footer { background: #f7f8fa; }
 header { border-bottom: 1px solid var(--borde); }
 footer { border-top: 1px solid var(--borde); justify-content: flex-end; gap: 8px; }
 .cuerpo { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }

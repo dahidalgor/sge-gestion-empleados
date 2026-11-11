@@ -19,7 +19,7 @@ defineEmits(['confirmar', 'cancelar'])
 </template>
 
 <style scoped>
-.fondo { position: fixed; inset: 0; background: rgba(20, 33, 61, .45); display: grid; place-items: center; z-index: 60; padding: 16px; }
+.fondo { position: fixed; inset: 0; background: rgba(0, 0, 0, .35); display: grid; place-items: center; z-index: 60; padding: 16px; }
 .dialogo { padding: 24px; max-width: 420px; width: 100%; display: flex; flex-direction: column; gap: 12px; }
 .dialogo p { margin: 0; color: var(--texto-suave); }
 .acciones { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
