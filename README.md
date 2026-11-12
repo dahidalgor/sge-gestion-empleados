@@ -22,12 +22,14 @@ Aplicación web con:
 Requisitos: Node.js 22+ y PostgreSQL (en esta máquina: `/Library/PostgreSQL/18`).
 
 ```bash
-npm run instalar      # instala dependencias de backend y frontend (solo la primera vez)
+npm run instalar      # instala dependencias (solo la primera vez)
 npm run db:crear      # crea un servidor PostgreSQL local en ./.pgdata, puerto 5433 (solo la primera vez)
-npm run db:iniciar    # inicia la base de datos (cada vez que se reinicia la computadora)
-npm run api           # terminal 1 → API en http://localhost:3000/api
-npm run web           # terminal 2 → App en http://localhost:5173
+npm run dev           # inicia base de datos + API + frontend en una sola terminal
 ```
+
+`npm run dev` enciende PostgreSQL si está apagado y luego corre el API (http://localhost:3000/api) y la app (http://localhost:5173) juntos; `Ctrl+C` detiene ambos. Para apagar la base de datos: `npm run db:detener`.
+
+Si se prefiere por separado: `npm run db:iniciar`, `npm run api` y `npm run web` en terminales distintas.
 
 Al arrancar por primera vez, el API crea las tablas y carga datos de muestra:
 
