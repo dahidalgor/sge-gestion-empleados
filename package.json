@@ -3,12 +3,17 @@
   "private": true,
   "description": "Sistema de Gestión de Empleados - Vue 3 + NestJS + PostgreSQL + JWT",
   "scripts": {
-    "instalar": "npm --prefix backend install && npm --prefix frontend install",
+    "dev": "npm run db:asegurar && concurrently -k -n api,web -c blue,green \"npm run api\" \"npm run web\"",
+    "instalar": "npm install && npm --prefix backend install && npm --prefix frontend install",
     "db:crear": "/Library/PostgreSQL/18/bin/initdb -D .pgdata -U postgres --auth=trust -E UTF8 --locale=C && npm run db:iniciar && /Library/PostgreSQL/18/bin/psql -h localhost -p 5433 -U postgres -c 'CREATE DATABASE sge_empleados;'",
-    "db:iniciar": "/Library/PostgreSQL/18/bin/pg_ctl -D .pgdata -o \"-p 5433 -k /tmp\" -l .pgdata/server.log start",
+    "db:iniciar": "/Library/PostgreSQL/18/bin/pg_ctl -D .pgdata -o \"-p 5433 -k /tmp\" -l .pgdata/server.log -w start",
+    "db:asegurar": "/Library/PostgreSQL/18/bin/pg_ctl -D .pgdata status >/dev/null || npm run db:iniciar",
     "db:detener": "/Library/PostgreSQL/18/bin/pg_ctl -D .pgdata stop",
     "api": "npm --prefix backend run start:dev",
     "web": "npm --prefix frontend run dev",
     "test": "npm --prefix backend test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.5"
   }
 }
