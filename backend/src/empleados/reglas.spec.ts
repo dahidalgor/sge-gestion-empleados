@@ -14,6 +14,7 @@ describe('Reglas de negocio de empleados', () => {
       expect(esCedulaValida('171003406')).toBe(false);
       expect(esCedulaValida('17100340AB')).toBe(false);
       expect(esCedulaValida('2510034065')).toBe(false); // provincia 25 no existe
+      expect(esCedulaValida('1760123453')).toBe(true); // tercer dígito 6 (cédulas nuevas)
     });
 
     it('completarCedula genera siempre cédulas válidas', () => {

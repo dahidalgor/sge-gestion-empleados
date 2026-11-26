@@ -8,7 +8,7 @@ export function esCedulaValida(cedula: string): boolean {
 
   const provincia = Number(cedula.slice(0, 2));
   if (!((provincia >= 1 && provincia <= 24) || provincia === 30)) return false;
-  if (Number(cedula[2]) >= 6) return false;
+  // No se restringe el tercer dígito: el Registro Civil ya emite cédulas con 6 (p. ej. 176xxxxxxx)
 
   const coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2];
   const suma = coeficientes.reduce((acc, coef, i) => {
