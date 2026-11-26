@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Manual de instalación – SGE</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+<div class="portada">
+  <div class="institucion">Pontificia Universidad Católica del Ecuador · Desarrollo de Aplicaciones en Sistemas de Información</div>
+  <h1>Manual de instalación del ambiente de desarrollo</h1>
+  <div class="datos">SGE – Sistema de Gestión de Empleados · Autor: David Hidalgo · Noviembre 2026 · Repositorio: <span class="mono">github.com/dahidalgor/sge-gestion-empleados</span></div>
+</div>
+
+<h2>1. Descripción general</h2>
+<p>El sistema tiene tres partes que se ejecutan en la misma máquina durante el desarrollo:</p>
+<table>
+  <tr><th>Componente</th><th>Tecnología</th><th>Carpeta</th><th>Dirección</th></tr>
+  <tr><td>Frontend (interfaz)</td><td>Vue 3 + Vite, Vue Router, Pinia, Axios</td><td><code>frontend/</code></td><td><code>http://localhost:5173</code></td></tr>
+  <tr><td>Backend (API REST)</td><td>NestJS, Passport JWT, bcrypt, TypeORM, Swagger</td><td><code>backend/</code></td><td><code>http://localhost:3000/api</code></td></tr>
+  <tr><td>Base de datos</td><td>PostgreSQL</td><td><code>.pgdata/</code> (opción A)</td><td><code>localhost:5433</code></td></tr>
+</table>
+
+<h2>2. Requisitos previos</h2>
+<table>
+  <tr><th>Software</th><th>Versión</th><th>Para qué se usa</th><th>Comprobar con</th></tr>
+  <tr><td>Node.js (incluye npm)</td><td>22 o superior (probado con 26)</td><td>Ejecutar el backend y el frontend</td><td><code>node -v</code></td></tr>
+  <tr><td>PostgreSQL</td><td>16 o superior (probado con 18)</td><td>Guardar usuarios y empleados</td><td><code>psql --version</code></td></tr>
+  <tr><td>Git</td><td>cualquiera reciente</td><td>Descargar el código fuente</td><td><code>git --version</code></td></tr>
+  <tr><td>Navegador</td><td>Chrome, Edge, Firefox o Safari actual</td><td>Usar la aplicación</td><td>–</td></tr>
+  <tr><td>Editor (opcional)</td><td>Visual Studio Code</td><td>Revisar y modificar el código</td><td>–</td></tr>
+</table>
+<p>Node.js se descarga de <span class="mono">nodejs.org</span> y PostgreSQL de <span class="mono">postgresql.org/download</span> (instalador de EDB para Windows y macOS).</p>
+
+<h2>3. Obtener el código fuente</h2>
+<pre>git clone https://github.com/dahidalgor/sge-gestion-empleados.git
+cd sge-gestion-empleados</pre>
+<p>Si se entrega en un archivo .zip, basta con descomprimirlo y abrir una terminal dentro de la carpeta.</p>
+
+<h2>4. Instalar las dependencias</h2>
+<p>Desde la carpeta raíz del proyecto (solo la primera vez):</p>
+<pre>npm run instalar</pre>
+<p>Este comando ejecuta <code>npm install</code> en la raíz, en <code>backend/</code> y en <code>frontend/</code>.</p>
+
+<h2>5. Configurar las variables de entorno</h2>
+<p>Los archivos <code>.env</code> no se suben a GitHub porque contienen secretos. Se crean copiando las plantillas:</p>
+<pre>cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env</pre>
+<p>En Windows (PowerShell) se usa <code>copy</code> en lugar de <code>cp</code>. Variables de <code>backend/.env</code>:</p>
+<table>
+  <tr><th>Variable</th><th>Valor por defecto</th><th>Significado</th></tr>
+  <tr><td><code>PORT</code></td><td>3000</td><td>Puerto del API</td></tr>
+  <tr><td><code>FRONTEND_URL</code></td><td>http://localhost:5173</td><td>Origen permitido por CORS</td></tr>
+  <tr><td><code>DB_HOST</code> / <code>DB_PORT</code></td><td>localhost / 5433</td><td>Servidor PostgreSQL</td></tr>
+  <tr><td><code>DB_USER</code> / <code>DB_PASSWORD</code></td><td>postgres / (vacío)</td><td>Credenciales de la base de datos</td></tr>
+  <tr><td><code>DB_NAME</code></td><td>sge_empleados</td><td>Nombre de la base de datos</td></tr>
+  <tr><td><code>JWT_SECRET</code></td><td>(texto largo)</td><td>Clave con la que se firman los tokens. Debe cambiarse en producción</td></tr>
+  <tr><td><code>JWT_EXPIRES_IN</code></td><td>1h</td><td>Tiempo de vida del token</td></tr>
+  <tr><td><code>SALARIO_BASICO</code></td><td>470</td><td>Salario mínimo aceptado al registrar empleados</td></tr>
+</table>
+<p><code>frontend/.env</code> solo tiene <code>VITE_API_URL=http://localhost:3000/api</code>, la dirección del API.</p>
+
+<h2>6. Preparar la base de datos</h2>
+<p>Hay dos formas. Basta con elegir una.</p>
+
+<h3>Opción A – Servidor local del proyecto (macOS con el instalador de EDB)</h3>
+<p>Crea un servidor PostgreSQL propio dentro de la carpeta <code>.pgdata</code>, en el puerto 5433, sin afectar a otro PostgreSQL instalado:</p>
+<pre>npm run db:crear</pre>
+<p>El script usa los programas de <code>/Library/PostgreSQL/18/bin</code>. Si PostgreSQL está en otra ruta, hay que corregirla en <code>package.json</code>.</p>
+
+<h3>Opción B – Un PostgreSQL ya instalado (Windows, Linux o macOS)</h3>
+<ol>
+  <li>Crear la base de datos con pgAdmin o desde la terminal:
+<pre>psql -U postgres -c "CREATE DATABASE sge_empleados;"</pre></li>
+  <li>En <code>backend/.env</code>, poner el puerto real (normalmente <code>DB_PORT=5432</code>) y la contraseña del usuario en <code>DB_PASSWORD</code>.</li>
+  <li>Para arrancar, usar los comandos por separado de la sección 7 (<code>npm run api</code> y <code>npm run web</code>), ya que <code>npm run dev</code> intenta encender el servidor de la opción A.</li>
+</ol>
+<p>No hace falta crear tablas a mano: al iniciar, el API las crea con TypeORM y carga 2 usuarios y 20 empleados de muestra.</p>
+
+<h2>7. Ejecutar el sistema</h2>
+<h3>Todo en una sola terminal (opción A)</h3>
+<pre>npm run dev</pre>
+<p>Enciende PostgreSQL si está apagado y luego inicia el API y el frontend juntos. <code>Ctrl + C</code> detiene ambos. Para apagar la base de datos: <code>npm run db:detener</code>.</p>
+<h3>Por separado (opción B, o para ver cada registro aparte)</h3>
+<pre>npm run api     # terminal 1: backend en http://localhost:3000/api
+npm run web     # terminal 2: frontend en http://localhost:5173</pre>
+<p>Con la opción A, antes se enciende la base de datos con <code>npm run db:iniciar</code>.</p>
+
+<h2>8. Comprobar la instalación</h2>
+<ol>
+  <li>Abrir <span class="mono">http://localhost:5173</span>: debe aparecer la pantalla de inicio de sesión.</li>
+  <li>Ingresar con un usuario de prueba:
+    <table>
+      <tr><th>Usuario</th><th>Contraseña</th><th>Rol</th><th>Permisos</th></tr>
+      <tr><td><code>admin</code></td><td><code>Admin123*</code></td><td>admin</td><td>ver, crear, editar y eliminar</td></tr>
+      <tr><td><code>consulta</code></td><td><code>Consulta123*</code></td><td>consulta</td><td>solo ver</td></tr>
+    </table></li>
+  <li>Abrir <span class="mono">http://localhost:3000/api/docs</span>: documentación Swagger del API.</li>
+  <li>Ejecutar las pruebas unitarias del backend (17 pruebas):
+<pre>npm test</pre></li>
+</ol>
+
+<h2>9. Problemas frecuentes</h2>
+<table>
+  <tr><th>Síntoma</th><th>Causa probable</th><th>Solución</th></tr>
+  <tr><td>El API muestra <code>ECONNREFUSED</code> o <code>connect</code> al iniciar</td><td>PostgreSQL apagado o puerto distinto</td><td>Encender la base (<code>npm run db:iniciar</code>) o corregir <code>DB_PORT</code> en <code>backend/.env</code></td></tr>
+  <tr><td><code>password authentication failed</code></td><td>Contraseña incorrecta en <code>.env</code></td><td>Poner la contraseña del usuario <code>postgres</code> en <code>DB_PASSWORD</code></td></tr>
+  <tr><td><code>database "sge_empleados" does not exist</code></td><td>No se creó la base</td><td>Ejecutar el paso 1 de la opción B</td></tr>
+  <tr><td><code>EADDRINUSE :3000</code> o <code>:5173</code></td><td>El puerto ya está ocupado</td><td>Cerrar el otro proceso o cambiar <code>PORT</code> (y <code>VITE_API_URL</code>)</td></tr>
+  <tr><td>La pantalla de login dice que no se pudo conectar con el servidor</td><td>El API no está corriendo</td><td>Revisar la terminal del API e iniciarlo con <code>npm run api</code></td></tr>
+  <tr><td><code>initdb: command not found</code> o ruta inexistente</td><td>PostgreSQL instalado en otra carpeta</td><td>Usar la opción B o corregir la ruta en <code>package.json</code></td></tr>
+</table>
+
+<h2>10. Estructura del proyecto</h2>
+<pre>backend/src/
+  auth/        login, generación y validación del JWT, roles
+  usuarios/    entidad y servicio de usuarios (contraseñas con bcrypt)
+  empleados/   entidad, DTOs, reglas de negocio, servicio y controlador del CRUD
+  seed/        datos de muestra
+frontend/src/
+  views/       Login, Panel, Empleados, Sesión JWT
+  components/  formulario de empleado, diálogo de confirmación, avisos
+  services/    cliente Axios que envía el token en cada petición
+  stores/      estado de la sesión (Pinia)
+  router/      rutas protegidas por la sesión</pre>
+
+</body>
+</html>

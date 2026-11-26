@@ -15,6 +15,8 @@ Aplicación web con:
 | Base de datos | PostgreSQL + TypeORM |
 | Pruebas | Vitest (pruebas unitarias del backend) |
 
+**Documentación de entrega:** [Manual de instalación (PDF)](docs/Manual%20de%20instalacion%20-%20SGE.pdf) · [Manual de usuario (PDF)](docs/Manual%20de%20usuario%20-%20SGE.pdf). Los PDF se generan desde `docs/fuente/`.
+
 ---
 
 ## Cómo ejecutarlo

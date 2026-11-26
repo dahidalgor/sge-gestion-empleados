@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Manual de usuario – SGE</title>
+<link rel="stylesheet" href="estilo.css">
+<style>
+  body { font-size: 9.6pt; }
+  h2 { margin-top: 10px; }
+  figure img { max-height: 62mm; object-fit: cover; object-position: top; }
+</style>
+</head>
+<body>
+
+<div class="portada">
+  <div class="institucion">Pontificia Universidad Católica del Ecuador · Desarrollo de Aplicaciones en Sistemas de Información</div>
+  <h1>Manual de usuario</h1>
+  <div class="datos">SGE – Sistema de Gestión de Empleados · Autor: David Hidalgo · Noviembre 2026</div>
+</div>
+
+<p>SGE permite registrar y administrar los datos del personal de una empresa. Para usarlo hay que iniciar sesión; el sistema entrega entonces un <b>token JWT</b> que identifica al usuario y que se envía en cada operación. Sin un token válido no se puede consultar ni modificar ningún dato.</p>
+
+<h2>1. Ingreso al sistema</h2>
+<div class="fila">
+  <div>
+    <ol>
+      <li>Abrir el sistema en el navegador (en desarrollo: <span class="mono">http://localhost:5173</span>).</li>
+      <li>Escribir el <b>usuario</b> y la <b>contraseña</b>. La casilla <i>Mostrar contraseña</i> permite ver lo escrito.</li>
+      <li>Pulsar <b>Ingresar</b>. Si los datos son incorrectos aparece un mensaje en rojo y se puede intentar de nuevo.</li>
+    </ol>
+    <table>
+      <tr><th>Rol</th><th>Puede hacer</th></tr>
+      <tr><td><b>admin</b></td><td>Ver, crear, editar y eliminar empleados</td></tr>
+      <tr><td><b>consulta</b></td><td>Solo ver y buscar</td></tr>
+    </table>
+    <p>Usuarios de prueba: <span class="mono">admin / Admin123*</span> y <span class="mono">consulta / Consulta123*</span>.</p>
+  </div>
+  <figure><img src="../img/01-login.png" alt="" style="max-height:none;width:62%;margin:0 auto"><figcaption>Figura 1. Pantalla de inicio de sesión.</figcaption></figure>
+</div>
+
+<h2>2. Pantalla principal</h2>
+<p>Después de ingresar se muestra el <b>Panel</b>. A la izquierda está el menú (<i>Panel</i>, <i>Empleados</i>, <i>Sesión JWT</i>). Arriba a la derecha aparecen el nombre y rol del usuario, el tiempo que le queda a la sesión (<b>Sesión: mm:ss</b>) y el botón <b>Cerrar sesión</b>.</p>
+<p>El Panel resume el personal: total de empleados, activos, en vacaciones o licencia, nómina mensual y la distribución por departamento y por estado. El botón <i>Ver listado de empleados</i> lleva al listado.</p>
+<figure><img src="../img/02-panel.png" alt=""><figcaption>Figura 2. Panel con el resumen del personal.</figcaption></figure>
+
+<h2 class="salto">3. Listado y búsqueda de empleados</h2>
+<p>En <b>Empleados</b> se ve la tabla con cédula, nombre y correo, departamento, cargo y contrato, fecha de ingreso, salario y estado.</p>
+<ul>
+  <li><b>Buscar:</b> escribir parte del nombre, apellido, cédula o correo en la caja de búsqueda.</li>
+  <li><b>Filtrar:</b> elegir un departamento o un estado en las listas desplegables. <i>Limpiar</i> quita todos los filtros.</li>
+  <li><b>Ordenar:</b> pulsar el título de una columna; un segundo clic invierte el orden (▲ / ▼).</li>
+  <li><b>Paginar:</b> al pie de la tabla se cambia de página con <i>Anterior</i> / <i>Siguiente</i> y se elige cuántas filas mostrar.</li>
+</ul>
+<figure><img src="../img/03-empleados.png" alt=""><figcaption>Figura 3. Listado de empleados con búsqueda, filtros y acciones (usuario admin).</figcaption></figure>
+
+<h2>4. Crear y editar un empleado (solo admin)</h2>
+<div class="fila">
+  <div>
+    <ol>
+      <li>Pulsar <b>+ Nuevo empleado</b>, o <b>Editar</b> en la fila del empleado.</li>
+      <li>Completar los 14 campos del formulario.</li>
+      <li>Pulsar <b>Crear empleado</b> (o <b>Guardar cambios</b>). Un aviso confirma la operación.</li>
+    </ol>
+    <p>El sistema revisa los datos antes de guardar y marca en rojo el campo con problemas:</p>
+    <ul>
+      <li>Cédula ecuatoriana válida de 10 dígitos y que no esté repetida.</li>
+      <li>Correo con formato válido y no repetido; teléfono de 10 dígitos que empiece con 0.</li>
+      <li>Ser mayor de 18 años; la fecha de ingreso no puede ser futura.</li>
+      <li>Salario igual o mayor al salario básico (USD 470).</li>
+    </ul>
+  </div>
+  <figure><img src="../img/04-formulario.png" alt=""><figcaption>Figura 4. Formulario de nuevo empleado.</figcaption></figure>
+</div>
+
+<h2>5. Eliminar un empleado (solo admin)</h2>
+<p>Pulsar <b>Eliminar</b> en la fila del empleado. El sistema pide confirmación indicando el nombre; al pulsar <b>Eliminar</b> en el cuadro, el registro se borra definitivamente. <i>Cancelar</i> no hace ningún cambio.</p>
+
+<h2 class="salto">6. Usuario de consulta</h2>
+<div class="fila">
+  <div>
+    <p>Con el rol <b>consulta</b> se ve el panel y el listado, y se puede buscar, filtrar y ordenar, pero no aparece el botón <i>Nuevo empleado</i> ni <i>Eliminar</i>, y <i>Editar</i> está desactivado.</p>
+    <p>Aunque alguien intentara enviar una modificación directamente al servidor, el API la rechaza porque el rol que va dentro del token no es <i>admin</i> (error 403).</p>
+  </div>
+  <figure><img src="../img/07-consulta.png" alt=""><figcaption>Figura 5. Listado en modo solo lectura.</figcaption></figure>
+</div>
+
+<h2>7. Sesión JWT</h2>
+<div class="fila">
+  <div>
+    <p>La opción <b>Sesión JWT</b> del menú muestra el token actual dividido en sus tres partes: <span style="color:#b42318">encabezado</span>, <span style="color:#5b3f9c">datos (payload)</span> y <span style="color:#1f6f8b">firma</span>. En el payload se ve el usuario, el rol, cuándo se emitió y cuándo expira.</p>
+    <p>En <i>Prueba en vivo del API</i> se puede llamar al servidor <b>con token</b> (responde 200 con los datos) y <b>sin token</b> (responde 401, acceso denegado). Así se comprueba que los datos están protegidos por el JWT.</p>
+  </div>
+  <figure><img src="../img/06-sesion.png" alt=""><figcaption>Figura 6. Contenido del token y prueba del API.</figcaption></figure>
+</div>
+
+<h2>8. Cierre y expiración de la sesión</h2>
+<ul>
+  <li><b>Cerrar sesión</b> borra el token del navegador y regresa al inicio de sesión.</li>
+  <li>El token dura <b>1 hora</b>. Cuando el contador llega a 00:00, el sistema avisa <i>“La sesión expiró, vuelva a iniciar sesión”</i> y regresa al login.</li>
+  <li>Si el token es alterado o el servidor lo rechaza, la sesión también se cierra automáticamente.</li>
+  <li>Si se intenta abrir una página interna sin haber iniciado sesión, el sistema redirige al login.</li>
+</ul>
+
+<h2>9. Mensajes frecuentes</h2>
+<table>
+  <tr><th>Mensaje</th><th>Qué significa / qué hacer</th></tr>
+  <tr><td>Usuario o contraseña incorrectos</td><td>Revisar los datos (se distinguen mayúsculas y minúsculas).</td></tr>
+  <tr><td>No se pudo conectar con el servidor</td><td>El API no está encendido. Consultar el manual de instalación.</td></tr>
+  <tr><td>Ya existe un empleado con esa cédula / email</td><td>Ya existe un empleado con ese dato; usar otro o editar el existente.</td></tr>
+  <tr><td>La sesión expiró</td><td>Volver a iniciar sesión.</td></tr>
+</table>
+
+</body>
+</html>
