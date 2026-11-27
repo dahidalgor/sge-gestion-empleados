@@ -4,3 +4,8 @@ dist/
 .env
 *.log
 .DS_Store
+
+# Respaldo de la base y paquete de entrega (pueden tener datos reales)
+respaldo/
+entrega/
+*.tsbuildinfo

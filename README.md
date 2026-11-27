@@ -21,19 +21,27 @@ Aplicación web con:
 
 ## Cómo ejecutarlo
 
-Requisitos: Node.js 22+ y PostgreSQL (en esta máquina: `/Library/PostgreSQL/18`).
+Requisitos: Node.js 22+ y PostgreSQL 16+ (Windows, macOS o Linux). Los scripts encuentran PostgreSQL solos; si no, indicar su carpeta `bin` en la variable `PG_BIN`.
 
 ```bash
-npm run instalar      # instala dependencias (solo la primera vez)
-npm run db:crear      # crea un servidor PostgreSQL local en ./.pgdata, puerto 5433 (solo la primera vez)
-npm run dev           # inicia base de datos + API + frontend en una sola terminal
+npm run instalar      # dependencias + backend/.env y frontend/.env (solo la primera vez)
+npm run db:crear      # servidor PostgreSQL propio en ./.pgdata (puerto 5433) + base + restaura el respaldo
+npm run dev           # base de datos + API + frontend en una sola terminal
 ```
 
-`npm run dev` enciende PostgreSQL si está apagado y luego corre el API (http://localhost:3000/api) y la app (http://localhost:5173) juntos; `Ctrl+C` detiene ambos. Para apagar la base de datos: `npm run db:detener`.
+`npm run preparar` hace los dos primeros pasos juntos. Con un PostgreSQL ya instalado: ajustar `DB_PORT`/`DB_PASSWORD` en `backend/.env` y usar `npm run db:restaurar` en lugar de `db:crear`.
 
-Si se prefiere por separado: `npm run db:iniciar`, `npm run api` y `npm run web` en terminales distintas.
+### Entregar el proyecto a otra computadora
 
-Al arrancar por primera vez, el API crea las tablas y carga datos de muestra:
+```bash
+npm run empaquetar    # respalda la base y genera entrega/SGE-gestion-empleados.zip
+```
+
+El zip lleva el código, los manuales y `respaldo/sge_empleados.sql` (la base completa, con usuarios y empleados reales). En la otra computadora se descomprime y se siguen los tres comandos de arriba. Otros comandos: `npm run db:respaldar`, `npm run db:restaurar` (no reemplaza una base con datos salvo con `-- --forzar`), `npm run db:iniciar`, `npm run db:detener`.
+
+> `respaldo/` y `entrega/` están en `.gitignore` porque contienen datos reales: el zip se entrega por un medio privado.
+
+Si no se restauró ningún respaldo, al arrancar por primera vez el API crea las tablas y carga datos de muestra:
 
 | Usuario | Contraseña | Rol | Permisos |
 |---|---|---|---|
@@ -135,11 +143,12 @@ backend/src/
   auth/        login, JWT (strategy, guard), roles
   usuarios/    entidad y servicio de usuarios
   empleados/   entidad, DTOs, reglas de negocio, servicio, controlador
-  seed/        datos de muestra
+  seed/        datos de muestra (solo si la base está vacía)
 frontend/src/
   views/       Login, Layout, Panel, Empleados, Sesión JWT
   components/  formulario de empleado, diálogo de confirmación, avisos
   services/    cliente Axios con interceptores del JWT
   stores/      sesión (Pinia)
   router/      rutas protegidas
+scripts/       base de datos (crear, respaldar, restaurar) y empaquetado del zip
 ```
