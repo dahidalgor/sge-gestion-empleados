@@ -12,7 +12,7 @@ Aplicación web con:
 |---|---|
 | Frontend | Vue 3 + Vite, Vue Router, Pinia, Axios |
 | Backend (API REST) | NestJS, Passport JWT, bcrypt, class-validator, Swagger |
-| Base de datos | PostgreSQL + TypeORM |
+| Base de datos | PostgreSQL 18 (embedded-postgres) + TypeORM |
 | Pruebas | Vitest (pruebas unitarias del backend) |
 
 **Documentación de entrega:** [Manual de instalación (PDF)](docs/Manual%20de%20instalacion%20-%20SGE.pdf) · [Manual de usuario (PDF)](docs/Manual%20de%20usuario%20-%20SGE.pdf). Los PDF se generan desde `docs/fuente/`.
@@ -21,7 +21,7 @@ Aplicación web con:
 
 ## Cómo ejecutarlo
 
-Requisitos: Node.js 22+ y PostgreSQL 16+ (Windows, macOS o Linux). Los scripts encuentran PostgreSQL solos; si no, indicar su carpeta `bin` en la variable `PG_BIN`.
+Requisito: **solo Node.js 22+** (Windows, macOS o Linux). PostgreSQL 18 se instala con npm mediante el paquete [`embedded-postgres`](https://www.npmjs.com/package/embedded-postgres); el respaldo y la restauración se hacen con el driver `pg`, sin `psql` ni `pg_dump`.
 
 ```bash
 npm run instalar      # dependencias + backend/.env y frontend/.env (solo la primera vez)
@@ -29,7 +29,7 @@ npm run db:crear      # servidor PostgreSQL propio en ./.pgdata (puerto 5433) + 
 npm run dev           # base de datos + API + frontend en una sola terminal
 ```
 
-`npm run preparar` hace los dos primeros pasos juntos. Con un PostgreSQL ya instalado: ajustar `DB_PORT`/`DB_PASSWORD` en `backend/.env` y usar `npm run db:restaurar` en lugar de `db:crear`.
+`npm run preparar` hace los dos primeros pasos juntos. Si se prefiere un PostgreSQL que ya exista: ajustar `DB_PORT`/`DB_PASSWORD` en `backend/.env` y usar `npm run db:restaurar` en lugar de `db:crear`.
 
 ### Entregar el proyecto a otra computadora
 

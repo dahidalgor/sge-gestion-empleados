@@ -1,4 +1,4 @@
-// Administración de la base de datos del proyecto (Windows, macOS y Linux)
+// Administración de la base de datos del proyecto (Windows, macOS y Linux; solo requiere Node.js)
 //
 //   node scripts/db.mjs crear       crea el servidor local en .pgdata, la base y restaura el respaldo
 //   node scripts/db.mjs iniciar     enciende el servidor local
@@ -9,30 +9,12 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { ES_WINDOWS, RAIZ, configuracionBD, ejecutar, programa } from './postgres.mjs';
+import { ES_WINDOWS, RAIZ, conectar, configuracionBD, ejecutar, programa } from './postgres.mjs';
+import { generarRespaldo } from './respaldo.mjs';
 
 const CARPETA_DATOS = path.join(RAIZ, '.pgdata');
 const ARCHIVO_RESPALDO = path.join(RAIZ, 'respaldo', 'sge_empleados.sql');
 const bd = configuracionBD();
-
-/** Argumentos de conexión comunes para psql y pg_dump */
-function conexion(nombreBase) {
-  return ['-h', bd.host, '-p', bd.puerto, '-U', bd.usuario, '-d', nombreBase];
-}
-
-/** Ejecuta una consulta y devuelve el texto de la respuesta (sin mostrarla) */
-function consultar(sql, nombreBase) {
-  const resultado = spawnSync(programa('psql'), [...conexion(nombreBase), '-tAc', sql], {
-    encoding: 'utf8',
-    env: { ...process.env, PGPASSWORD: bd.password },
-  });
-  if (resultado.status !== 0) {
-    console.error(resultado.stderr);
-    console.error('No se pudo conectar con PostgreSQL. ¿Está encendido? Revise DB_HOST, DB_PORT y DB_PASSWORD en backend/.env');
-    process.exit(1);
-  }
-  return resultado.stdout.trim();
-}
 
 function servidorLocalEncendido() {
   const resultado = spawnSync(programa('pg_ctl'), ['-D', CARPETA_DATOS, 'status'], { stdio: 'ignore' });
@@ -46,22 +28,25 @@ function iniciar() {
   ejecutar(programa('pg_ctl'), ['-D', CARPETA_DATOS, '-o', opcionesServidor, '-l', path.join(CARPETA_DATOS, 'server.log'), '-w', 'start']);
 }
 
-function crearBaseSiNoExiste() {
-  const existe = consultar(`SELECT 1 FROM pg_database WHERE datname = '${bd.nombre}'`, 'postgres');
-  if (existe === '1') return;
-  ejecutar(programa('psql'), [...conexion('postgres'), '-c', `CREATE DATABASE ${bd.nombre};`], { password: bd.password });
-  console.log(`Base de datos "${bd.nombre}" creada.`);
+async function crearBaseSiNoExiste() {
+  const cliente = await conectar('postgres');
+  const resultado = await cliente.query('SELECT 1 FROM pg_database WHERE datname = $1', [bd.nombre]);
+  if (resultado.rowCount === 0) {
+    await cliente.query(`CREATE DATABASE "${bd.nombre}"`);
+    console.log(`Base de datos "${bd.nombre}" creada.`);
+  }
+  await cliente.end();
 }
 
-function crear() {
+async function crear() {
   if (existsSync(CARPETA_DATOS)) {
     console.log('El servidor local ya existe en .pgdata (no se modifica).');
   } else {
     ejecutar(programa('initdb'), ['-D', CARPETA_DATOS, '-U', 'postgres', '--auth=trust', '-E', 'UTF8', '--locale=C']);
   }
   if (!servidorLocalEncendido()) iniciar();
-  crearBaseSiNoExiste();
-  if (existsSync(ARCHIVO_RESPALDO)) restaurar();
+  await crearBaseSiNoExiste();
+  if (existsSync(ARCHIVO_RESPALDO)) await restaurar();
 }
 
 function asegurar() {
@@ -76,60 +61,61 @@ function detener() {
   ejecutar(programa('pg_ctl'), ['-D', CARPETA_DATOS, 'stop']);
 }
 
-function respaldar() {
-  mkdirSync(path.dirname(ARCHIVO_RESPALDO), { recursive: true });
-  ejecutar(
-    programa('pg_dump'),
-    [...conexion(bd.nombre), '--clean', '--if-exists', '--no-owner', '--no-privileges', '--encoding=UTF8', '-f', ARCHIVO_RESPALDO],
-    { password: bd.password },
-  );
-
-  // Se quitan las órdenes que solo entienden las versiones más nuevas de psql,
-  // para que el respaldo se pueda restaurar también en PostgreSQL 16 o 17.
-  const lineas = readFileSync(ARCHIVO_RESPALDO, 'utf8').split('\n');
-  const compatibles = lineas.filter((linea) => {
-    if (linea.startsWith('\\restrict') || linea.startsWith('\\unrestrict')) return false;
-    if (linea.startsWith('SET transaction_timeout')) return false;
-    return true;
-  });
-  const encabezado = `-- Respaldo de la base "${bd.nombre}" del SGE generado el ${new Date().toLocaleString('es-EC')}\n`;
-  writeFileSync(ARCHIVO_RESPALDO, encabezado + compatibles.join('\n'));
-
-  const empleados = consultar('SELECT count(*) FROM empleados', bd.nombre);
-  const usuarios = consultar('SELECT count(*) FROM usuarios', bd.nombre);
-  console.log(`Respaldo guardado en respaldo/sge_empleados.sql (${empleados} empleados, ${usuarios} usuarios).`);
+/** Texto con la cantidad de filas de cada tabla, p. ej. "21 empleados, 2 usuarios" */
+function describir(resumen) {
+  return Object.entries(resumen)
+    .map(([tabla, cantidad]) => `${cantidad} ${tabla}`)
+    .join(', ');
 }
 
-function restaurar() {
+async function respaldar() {
+  const cliente = await conectar(bd.nombre);
+  const { sql, resumen } = await generarRespaldo(cliente);
+  await cliente.end();
+
+  const encabezado = `-- Respaldo de la base "${bd.nombre}" del SGE generado el ${new Date().toLocaleString('es-EC')}\n-- Restaurar con: npm run db:restaurar\n\n`;
+  mkdirSync(path.dirname(ARCHIVO_RESPALDO), { recursive: true });
+  writeFileSync(ARCHIVO_RESPALDO, encabezado + sql);
+  console.log(`Respaldo guardado en respaldo/sge_empleados.sql (${describir(resumen)}).`);
+}
+
+async function restaurar() {
   if (!existsSync(ARCHIVO_RESPALDO)) {
     console.error('No existe respaldo/sge_empleados.sql. Primero ejecute "npm run db:respaldar" en la computadora de origen.');
     process.exit(1);
   }
-  crearBaseSiNoExiste();
+  await crearBaseSiNoExiste();
+  const cliente = await conectar(bd.nombre);
 
   // Protección: si la base ya tiene empleados, no se reemplaza sin confirmarlo
-  const hayTabla = consultar("SELECT to_regclass('public.empleados') IS NOT NULL", bd.nombre) === 't';
-  if (hayTabla && !process.argv.includes('--forzar')) {
-    const cantidad = Number(consultar('SELECT count(*) FROM empleados', bd.nombre));
+  const tabla = await cliente.query("SELECT to_regclass('public.empleados') IS NOT NULL AS existe");
+  if (tabla.rows[0].existe && !process.argv.includes('--forzar')) {
+    const conteo = await cliente.query('SELECT count(*)::int AS cantidad FROM empleados');
+    const cantidad = conteo.rows[0].cantidad;
     if (cantidad > 0) {
       console.error(`La base "${bd.nombre}" ya tiene ${cantidad} empleados y el respaldo los reemplazaría.`);
       console.error('Si es lo que quiere, ejecute:  npm run db:restaurar -- --forzar');
+      await cliente.end();
       process.exit(1);
     }
   }
 
-  // client_min_messages=warning oculta los avisos "no existe, se omite" del --clean
-  process.env.PGOPTIONS = '-c client_min_messages=warning';
-  // La salida normal de psql (resultados de setval) se descarta; los errores sí se muestran
-  let salidaDescartada = '/dev/null';
-  if (ES_WINDOWS) salidaDescartada = 'NUL';
-  ejecutar(programa('psql'), [...conexion(bd.nombre), '-q', '-v', 'ON_ERROR_STOP=1', '-o', salidaDescartada, '-f', ARCHIVO_RESPALDO], {
-    password: bd.password,
-  });
+  // El archivo trae BEGIN ... COMMIT: si una orden falla, no se aplica nada
+  try {
+    await cliente.query(readFileSync(ARCHIVO_RESPALDO, 'utf8'));
+  } catch (error) {
+    console.error(`No se pudo restaurar el respaldo: ${error.message}`);
+    console.error('La base no fue modificada.');
+    await cliente.end();
+    process.exit(1);
+  }
 
-  const empleados = consultar('SELECT count(*) FROM empleados', bd.nombre);
-  const usuarios = consultar('SELECT count(*) FROM usuarios', bd.nombre);
-  console.log(`Respaldo restaurado en "${bd.nombre}": ${empleados} empleados y ${usuarios} usuarios.`);
+  const empleados = await cliente.query('SELECT count(*)::int AS cantidad FROM empleados');
+  const usuarios = await cliente.query('SELECT count(*)::int AS cantidad FROM usuarios');
+  await cliente.end();
+  console.log(
+    `Respaldo restaurado en "${bd.nombre}": ${empleados.rows[0].cantidad} empleados y ${usuarios.rows[0].cantidad} usuarios.`,
+  );
 }
 
 const acciones = { crear, iniciar, asegurar, detener, respaldar, restaurar };
@@ -138,4 +124,4 @@ if (!accion) {
   console.error(`Uso: node scripts/db.mjs <${Object.keys(acciones).join('|')}>`);
   process.exit(1);
 }
-accion();
+await accion();

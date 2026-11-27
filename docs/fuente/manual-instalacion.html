@@ -19,19 +19,18 @@
   <tr><th>Componente</th><th>Tecnología</th><th>Carpeta</th><th>Dirección</th></tr>
   <tr><td>Frontend (interfaz)</td><td>Vue 3 + Vite, Vue Router, Pinia, Axios</td><td><code>frontend/</code></td><td><code>http://localhost:5173</code></td></tr>
   <tr><td>Backend (API REST)</td><td>NestJS, Passport JWT, bcrypt, TypeORM, Swagger</td><td><code>backend/</code></td><td><code>http://localhost:3000/api</code></td></tr>
-  <tr><td>Base de datos</td><td>PostgreSQL</td><td><code>.pgdata/</code> + <code>respaldo/</code></td><td><code>localhost:5433</code></td></tr>
+  <tr><td>Base de datos</td><td>PostgreSQL 18 (incluido vía npm: <code>embedded-postgres</code>)</td><td><code>.pgdata/</code> + <code>respaldo/</code></td><td><code>localhost:5433</code></td></tr>
 </table>
 
 <h2>2. Requisitos previos</h2>
+<p><b>Solo se necesita Node.js.</b> PostgreSQL no se instala aparte: viene dentro del paquete npm <code>embedded-postgres</code>, que descarga automáticamente la versión correcta para Windows, macOS o Linux.</p>
 <table>
   <tr><th>Software</th><th>Versión</th><th>Para qué se usa</th><th>Comprobar con</th></tr>
-  <tr><td>Node.js (incluye npm)</td><td>22 o superior (probado con 26)</td><td>Ejecutar el backend y el frontend</td><td><code>node -v</code></td></tr>
-  <tr><td>PostgreSQL</td><td>16 o superior (probado con 18)</td><td>Guardar usuarios y empleados</td><td><code>psql --version</code></td></tr>
-  <tr><td>Git</td><td>cualquiera reciente</td><td>Descargar el código fuente</td><td><code>git --version</code></td></tr>
+  <tr><td>Node.js (incluye npm)</td><td>22 o superior (probado con 26)</td><td>Ejecutar el sistema, la base de datos y los scripts</td><td><code>node -v</code></td></tr>
   <tr><td>Navegador</td><td>Chrome, Edge, Firefox o Safari actual</td><td>Usar la aplicación</td><td>–</td></tr>
   <tr><td>Editor (opcional)</td><td>Visual Studio Code</td><td>Revisar y modificar el código</td><td>–</td></tr>
 </table>
-<p>Node.js se descarga de <span class="mono">nodejs.org</span> y PostgreSQL de <span class="mono">postgresql.org/download</span> (instalador de EDB para Windows y macOS).</p>
+<p>Node.js se descarga de <span class="mono">nodejs.org</span> (versión LTS). La primera instalación necesita internet y ocupa alrededor de 700 MB en las carpetas <code>node_modules</code> (PostgreSQL aporta unos 340 MB en macOS y 110 MB en Windows).</p>
 
 <h2>3. Obtener el proyecto</h2>
 <p>El proyecto se entrega en el archivo <b><code>SGE-gestion-empleados.zip</code></b>. Basta con descomprimirlo en cualquier carpeta y abrir una terminal (en Windows, PowerShell o CMD) dentro de <code>sge-gestion-empleados/</code>. El zip contiene:</p>
@@ -47,10 +46,10 @@
 <h2>4. Instalar las dependencias</h2>
 <p>Desde la carpeta raíz del proyecto (solo la primera vez):</p>
 <pre>npm run instalar</pre>
-<p>Ejecuta <code>npm install</code> en la raíz, en <code>backend/</code> y en <code>frontend/</code>, y crea <code>backend/.env</code> y <code>frontend/.env</code> copiando las plantillas <code>.env.example</code> (si ya existen, no se tocan).</p>
+<p>Ejecuta <code>npm install</code> en la raíz (incluye PostgreSQL), en <code>backend/</code> y en <code>frontend/</code>, y crea <code>backend/.env</code> y <code>frontend/.env</code> copiando las plantillas <code>.env.example</code> (si ya existen, no se tocan).</p>
 
 <h2>5. Variables de entorno</h2>
-<p>Valores de <code>backend/.env</code>. Solo hay que cambiarlos si se usa un PostgreSQL ya instalado (opción B del paso 6):</p>
+<p>Valores de <code>backend/.env</code>. Solo hay que cambiarlos si se usa un PostgreSQL que ya exista (opción B del paso 6):</p>
 <table>
   <tr><th>Variable</th><th>Valor por defecto</th><th>Significado</th></tr>
   <tr><td><code>PORT</code> / <code>FRONTEND_URL</code></td><td>3000 / http://localhost:5173</td><td>Puerto del API y origen permitido por CORS</td></tr>
@@ -63,12 +62,12 @@
 <p><code>frontend/.env</code> solo tiene <code>VITE_API_URL=http://localhost:3000/api</code>.</p>
 
 <h2>6. Preparar la base de datos y restaurar el respaldo</h2>
-<p>Los scripts buscan PostgreSQL automáticamente en las rutas habituales (<code>C:\Program Files\PostgreSQL\&lt;versión&gt;\bin</code>, <code>/Library/PostgreSQL/&lt;versión&gt;/bin</code>, Postgres.app, Homebrew, <code>/usr/lib/postgresql/&lt;versión&gt;/bin</code> o el PATH). Si está en otro lugar, se indica con la variable <code>PG_BIN</code>. Elegir una opción:</p>
+<p>Los scripts usan el PostgreSQL que trae npm y se conectan con el driver <code>pg</code> de Node, así que no hacen falta <code>psql</code> ni <code>pg_dump</code>. Elegir una opción:</p>
 <h3>Opción A – Servidor propio del proyecto (recomendada)</h3>
 <pre>npm run db:crear</pre>
 <p>Crea un servidor PostgreSQL dentro de la carpeta <code>.pgdata</code> en el puerto 5433 (no afecta a otro PostgreSQL instalado), crea la base <code>sge_empleados</code> y <b>restaura <code>respaldo/sge_empleados.sql</code></b>. Al final muestra cuántos empleados y usuarios se cargaron.</p>
 <p>Atajo: <code>npm run preparar</code> hace los pasos 4 y 6A juntos.</p>
-<h3>Opción B – Un PostgreSQL ya instalado</h3>
+<h3>Opción B – Un PostgreSQL que ya exista (opcional)</h3>
 <ol>
   <li>En <code>backend/.env</code>, poner el puerto real (normalmente <code>DB_PORT=5432</code>) y la contraseña en <code>DB_PASSWORD</code>.</li>
   <li>Ejecutar <code>npm run db:restaurar</code>: crea la base si no existe y carga el respaldo.</li>
@@ -92,7 +91,7 @@
 <p>Genera un respaldo actualizado de la base (<code>respaldo/sge_empleados.sql</code>) y el archivo <b><code>entrega/SGE-gestion-empleados.zip</code></b> con el código, los manuales y ese respaldo. Ese zip es lo que se entrega al siguiente ingeniero, que sigue este manual desde el paso 3.</p>
 <table>
   <tr><th>Comando</th><th>Qué hace</th></tr>
-  <tr><td><code>npm run db:respaldar</code></td><td>Solo guarda la base en <code>respaldo/sge_empleados.sql</code> (SQL plano, se restaura en PostgreSQL 16 o superior)</td></tr>
+  <tr><td><code>npm run db:respaldar</code></td><td>Solo guarda la base en <code>respaldo/sge_empleados.sql</code> (SQL plano generado con Node; restaura estructura, datos, claves y contadores en una transacción)</td></tr>
   <tr><td><code>npm run db:restaurar</code></td><td>Carga el respaldo. Si la base ya tiene empleados se detiene para no borrarlos; para reemplazarlos: <code>npm run db:restaurar -- --forzar</code></td></tr>
 </table>
 <div class="nota">El respaldo contiene datos reales del personal: no se sube a GitHub (está en <code>.gitignore</code>) y el zip debe entregarse por un medio privado.</div>
@@ -100,7 +99,7 @@
 <h2>10. Problemas frecuentes</h2>
 <table>
   <tr><th>Síntoma</th><th>Solución</th></tr>
-  <tr><td>No se encontró “initdb”, “psql” o “pg_dump”</td><td>Instalar PostgreSQL o indicar su carpeta <code>bin</code>: <code>export PG_BIN=/ruta/bin</code> (Windows: <code>set PG_BIN=C:\Program Files\PostgreSQL\18\bin</code>)</td></tr>
+  <tr><td>No se encontró PostgreSQL para este sistema</td><td>Falta instalar las dependencias: ejecutar <code>npm run instalar</code> (con internet)</td></tr>
   <tr><td>No se pudo conectar con PostgreSQL / <code>ECONNREFUSED</code></td><td>Encender la base (<code>npm run db:iniciar</code>) o corregir <code>DB_PORT</code> y <code>DB_PASSWORD</code> en <code>backend/.env</code></td></tr>
   <tr><td>“La base ya tiene N empleados y el respaldo los reemplazaría”</td><td>Protección contra pérdida de datos. Usar <code>-- --forzar</code> solo si se quiere reemplazar</td></tr>
   <tr><td><code>EADDRINUSE :3000</code> o <code>:5173</code></td><td>Otro proceso usa el puerto: cerrarlo o cambiar <code>PORT</code> (y <code>VITE_API_URL</code>)</td></tr>
@@ -110,7 +109,7 @@
 <h2>11. Estructura del proyecto</h2>
 <pre>backend/src/   auth (login, JWT, roles) · usuarios · empleados (CRUD y reglas) · seed
 frontend/src/  views · components · services (Axios + token) · stores (sesión) · router
-scripts/       db.mjs (base y respaldos) · empaquetar.mjs · configurar.mjs
+scripts/       db.mjs (servidor) · respaldo.mjs (pg_dump en Node) · empaquetar.mjs · configurar.mjs
 respaldo/      sge_empleados.sql (respaldo de la base)
 docs/          manuales en PDF y su fuente HTML</pre>
 
